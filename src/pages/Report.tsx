@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -9,9 +8,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ArrowLeft, FileText, MapPin, Calendar, AlertTriangle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { useReports } from "@/hooks/useReports";
 
 const Report = () => {
   const { toast } = useToast();
+  const { addReport } = useReports();
+  
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
@@ -37,11 +39,24 @@ const Report = () => {
     e.preventDefault();
     setIsSubmitting(true);
 
+    // Add the report to the store
+    const reportId = addReport({
+      name: formData.name,
+      phone: formData.phone,
+      email: formData.email,
+      location: formData.location,
+      category: formData.category,
+      severity: formData.severity,
+      title: formData.title,
+      description: formData.description,
+      dateOccurred: formData.dateOccurred
+    });
+
     // Simulate form submission
     setTimeout(() => {
       toast({
         title: "Report Submitted Successfully",
-        description: "Your grievance has been recorded and will be reviewed by our team. Reference ID: GR-2024-001"
+        description: `Your grievance has been recorded and will be reviewed by our team. Reference ID: ${reportId}`
       });
       
       // Reset form

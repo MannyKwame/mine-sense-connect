@@ -1,11 +1,13 @@
-
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, TrendingUp, AlertTriangle, MapPin, Download, Filter } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useReports } from "@/hooks/useReports";
 
 const Dashboard = () => {
+  const { reports } = useReports();
+
   // Mock data for demonstration
   const stats = [
     { label: "Total Reports", value: "247", change: "+12%", color: "blue" },
@@ -148,14 +150,9 @@ const Dashboard = () => {
             <Card className="p-6">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-semibold text-gray-900">Recent Reports</h2>
-                <Link to="/report">
-                  <Button size="sm" className="bg-gradient-to-r from-green-500 to-emerald-600">
-                    New Report
-                  </Button>
-                </Link>
               </div>
               <div className="space-y-4">
-                {recentReports.map((report) => (
+                {reports.map((report) => (
                   <div key={report.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
                     <div className="flex items-start justify-between mb-2">
                       <div className="flex-1">
@@ -166,7 +163,7 @@ const Dashboard = () => {
                             {report.location}
                           </span>
                           <span>#{report.id}</span>
-                          <span>{report.date}</span>
+                          <span>{report.dateSubmitted}</span>
                         </div>
                       </div>
                       <div className="flex flex-col items-end space-y-2">
@@ -179,7 +176,7 @@ const Dashboard = () => {
                       </div>
                     </div>
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-600">Reporter: {report.reporter}</span>
+                      <span className="text-gray-600">Reporter: {report.name}</span>
                       <Badge variant="outline">{report.category}</Badge>
                     </div>
                   </div>
