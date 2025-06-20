@@ -1,12 +1,17 @@
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, TrendingUp, AlertTriangle, MapPin, Download, Filter } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useReports } from "@/hooks/useReports";
+import { exportService } from "@/services/api";
+import { useToast } from "@/hooks/use-toast";
 
 const Dashboard = () => {
   const { reports } = useReports();
+  const { toast } = useToast();
+  const [isExporting, setIsExporting] = useState(false);
 
   // Mock data for demonstration
   const stats = [
@@ -16,55 +21,31 @@ const Dashboard = () => {
     { label: "Critical Issues", value: "12", change: "-2%", color: "red" }
   ];
 
-  const recentReports = [
-    {
-      id: "GR-2024-089",
-      title: "Water contamination from mining runoff",
-      location: "Konongo, Ashanti Region",
-      category: "Environmental",
-      severity: "High",
-      status: "Under Review",
-      date: "2024-01-15",
-      reporter: "Kwame A."
-    },
-    {
-      id: "GR-2024-088",
-      title: "Excessive dust affecting respiratory health",
-      location: "Obuasi, Ashanti Region",
-      category: "Health & Safety",
-      severity: "Medium",
-      status: "In Progress",
-      date: "2024-01-14",
-      reporter: "Ama B."
-    },
-    {
-      id: "GR-2024-087",
-      title: "Property damage from blasting operations",
-      location: "Tarkwa, Western Region",
-      category: "Property Damage",
-      severity: "High",
-      status: "Resolved",
-      date: "2024-01-13",
-      reporter: "Kofi C."
-    },
-    {
-      id: "GR-2024-086",
-      title: "Unpaid compensation for land acquisition",
-      location: "Prestea, Western Region",
-      category: "Compensation",
-      severity: "Critical",
-      status: "Escalated",
-      date: "2024-01-12",
-      reporter: "Akua D."
-    }
-  ];
-
   const hotspots = [
     { location: "Konongo, Ashanti", issues: 23, trend: "↑" },
     { location: "Obuasi, Ashanti", issues: 18, trend: "↓" },
     { location: "Tarkwa, Western", issues: 15, trend: "↑" },
     { location: "Prestea, Western", issues: 12, trend: "→" }
   ];
+
+  const handleExport = async () => {
+    setIsExporting(true);
+    try {
+      await exportService.exportReports();
+      toast({
+        title: "Export Successful",
+        description: "Reports have been exported to CSV file and downloaded.",
+      });
+    } catch (error) {
+      toast({
+        title: "Export Failed",
+        description: "Failed to export reports. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   const getSeverityColor = (severity: string) => {
     switch (severity.toLowerCase()) {
@@ -114,9 +95,14 @@ const Dashboard = () => {
                 <Filter className="w-4 h-4 mr-2" />
                 Filters
               </Button>
-              <Button variant="outline" size="sm">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleExport}
+                disabled={isExporting}
+              >
                 <Download className="w-4 h-4 mr-2" />
-                Export
+                {isExporting ? 'Exporting...' : 'Export CSV'}
               </Button>
             </div>
           </div>
@@ -150,6 +136,7 @@ const Dashboard = () => {
             <Card className="p-6">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-semibold text-gray-900">Recent Reports</h2>
+                <Badge variant="outline">{reports.length} total</Badge>
               </div>
               <div className="space-y-4">
                 {reports.map((report) => (
@@ -234,6 +221,23 @@ const Dashboard = () => {
                   </p>
                 </div>
               </div>
+            </Card>
+
+            {/* Export Info */}
+            <Card className="p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Data Export</h3>
+              <p className="text-sm text-gray-600 mb-4">
+                Export all reports data to CSV format for analysis or record keeping.
+              </p>
+              <Button 
+                onClick={handleExport} 
+                disabled={isExporting}
+                className="w-full"
+                variant="outline"
+              >
+                <Download className="w-4 h-4 mr-2" />
+                {isExporting ? 'Preparing Export...' : 'Download CSV Report'}
+              </Button>
             </Card>
           </div>
         </div>
